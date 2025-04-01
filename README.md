@@ -20,7 +20,8 @@ https://snowtrace.io/address/0x8052099dE8D0e4dc69D6792507080Fc83EEb8A07
 
 
 ## Release Logs
-# SCAI Bridge Smart Contracts (V3)
+SCAI Bridge Smart Contracts (V3)
 Released on 5th April, 2025
-# SCAI Bridge Smart Contracts (V2)
+
+SCAI Bridge Smart Contracts (V2)
 Released on 6th December, 2023
