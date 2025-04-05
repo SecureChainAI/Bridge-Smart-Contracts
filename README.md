@@ -6,7 +6,7 @@ https://polygonscan.com/address/0x8052099dE8D0e4dc69D6792507080Fc83EEb8A07
 https://basescan.org/address/0x8052099dE8D0e4dc69D6792507080Fc83EEb8A07
 https://optimistic.etherscan.io/address/0x8052099dE8D0e4dc69D6792507080Fc83EEb8A07
 https://arbiscan.io/address/0x8052099de8d0e4dc69d6792507080fc83eeb8a07
-https://snowtrace.io/address/0x8052099dE8D0e4dc69D6792507080Fc83EEb8A07
+https://snowscan.xyz/address/0x8052099de8d0e4dc69d6792507080fc83eeb8a07
 
 
 ## Key points:
