@@ -1,4 +1,15 @@
-//SPDX-License-Identifier: MIT
+/*
+
+
+███████╗ ██████╗ █████╗ ██╗        ██████╗ ██████╗ ██╗██████╗  ██████╗ ███████╗        ██╗   ██╗██████╗ 
+██╔════╝██╔════╝██╔══██╗██║        ██╔══██╗██╔══██╗██║██╔══██╗██╔════╝ ██╔════╝        ██║   ██║╚════██╗
+███████╗██║     ███████║██║        ██████╔╝██████╔╝██║██║  ██║██║  ███╗█████╗          ██║   ██║ █████╔╝
+╚════██║██║     ██╔══██║██║        ██╔══██╗██╔══██╗██║██║  ██║██║   ██║██╔══╝          ╚██╗ ██╔╝ ╚═══██╗
+███████║╚██████╗██║  ██║██║        ██████╔╝██║  ██║██║██████╔╝╚██████╔╝███████╗         ╚████╔╝ ██████╔╝
+╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝  ╚═════╝ ╚══════╝          ╚═══╝  ╚═════╝ 
+
+
+*///SPDX-License-Identifier: MIT
 pragma solidity 0.8.29; 
 
 interface ERC20Essential 
@@ -15,6 +26,7 @@ interface ERC20Essential
 interface usdtContract
 {
     function transferFrom(address _from, address _to, uint256 _amount) external;
+    function transfer(address _to, uint256 _amount) external;
 }
 
 
@@ -79,6 +91,7 @@ contract SCAIBridge_v3 is owned {
     address public burnAddress = 0x000000000000000000000000000000000000dEaD;
     address public USDScontract = 0x3A15028e6b1d1040f64BC19f0D89A336eA45D8a5;
     address public USDTcontractInEthereum = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address public SCAIcontractAddress = 0x774b9Dd3977a7556BF16Cc22B74b2991e4511E13;
     
 
     // This generates a public event of coin received by contract
@@ -129,7 +142,7 @@ contract SCAIBridge_v3 is owned {
         orderID++;
         uint256 fee;
         
-        if(inputTokenAddress == address(USDTcontractInEthereum)){
+        if(inputTokenAddress == USDTcontractInEthereum){
             //There should be different interface for the USDT Ethereum contract
             usdtContract(inputTokenAddress).transferFrom(msg.sender, address(this), tokenAmount);
         }else{
@@ -139,9 +152,15 @@ contract SCAIBridge_v3 is owned {
         //deducting fee. burn fee for SCAI token movement and pegged token fee for USDS/USDT movement
         if(inputTokenAddress == USDScontract || outputTokenAddress == USDScontract){
             fee = (tokenAmount * peggedTokenFeePercentage) / 1000;
-            ERC20Essential(inputTokenAddress).transfer(peggedTokenFeeRecipient, fee);
+            
+            if(inputTokenAddress == USDTcontractInEthereum){
+            //There should be different interface for the USDT Ethereum contract
+                usdtContract(inputTokenAddress).transfer(peggedTokenFeeRecipient, fee);
+            }else{
+                ERC20Essential(inputTokenAddress).transfer(peggedTokenFeeRecipient, fee);
+            }
         }
-        else{
+        else if(inputTokenAddress == SCAIcontractAddress){
             fee = (tokenAmount * scaiBurnFeePercentage) / 1000;
             ERC20Essential(inputTokenAddress).transfer(burnAddress, fee);
         }
@@ -164,7 +183,13 @@ contract SCAIBridge_v3 is owned {
     function tokenOut(address outputTokenAddress, address user, uint256 tokenAmount, uint256 _orderID, uint256 inputChainID) external onlySigner returns(bool){
             require(bridgeStatus, "Bridge is inactive");
           
-            ERC20Essential(outputTokenAddress).transfer(user, tokenAmount);
+            
+            if(outputTokenAddress == USDTcontractInEthereum){
+            //There should be different interface for the USDT Ethereum contract
+                usdtContract(outputTokenAddress).transfer(user, tokenAmount);
+            }else{
+                ERC20Essential(outputTokenAddress).transfer(user, tokenAmount);
+            }
 
             if(exraCoinRewards > 0 && address(this).balance >= exraCoinRewards && user.balance == 0 ){
                 payable(user).transfer(exraCoinRewards);
@@ -201,5 +226,8 @@ contract SCAIBridge_v3 is owned {
         USDScontract = _USDScontract;
     }
 
+    function setSCAIcontract(address _SCAIcontract) external onlyOwner{
+        SCAIcontractAddress = _SCAIcontract;
+    }
 
 }
